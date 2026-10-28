@@ -1,4 +1,4 @@
-import { Account, Transaction, SystemStatus, LookupComparison, DSAState } from '../types/bank';
+import { Account, Transaction, SystemStatus, DSAState } from '../types/bank';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -29,12 +29,6 @@ export const api = {
   async getAccount(account_number: string): Promise<Account> {
     const res = await fetch(`${API_BASE}/api/accounts/${account_number}`);
     if (!res.ok) throw new Error('Account not found');
-    return res.json();
-  },
-
-  async compareLookup(account_number: string): Promise<LookupComparison> {
-    const res = await fetch(`${API_BASE}/api/accounts/${account_number}/lookup-comparison`);
-    if (!res.ok) throw new Error('Failed to run lookup comparison');
     return res.json();
   },
 
@@ -168,12 +162,6 @@ export const api = {
   async getGraphCycles(): Promise<{ cycle_count: number; cycles: Array<string[]> }> {
     const res = await fetch(`${API_BASE}/api/graph/cycles`);
     if (!res.ok) throw new Error('Failed to query graph cycles');
-    return res.json();
-  },
-
-  async getPerformanceBenchmarks(suite = 'search', scale = 'fast'): Promise<any> {
-    const res = await fetch(`${API_BASE}/api/performance/benchmarks?suite=${suite}&scale=${scale}`);
-    if (!res.ok) throw new Error('Failed to run benchmarks');
     return res.json();
   },
 

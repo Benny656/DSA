@@ -15,8 +15,7 @@ from data_structures.doubly_linked_list import DoublyLinkedList
 from data_structures.stack import Stack
 from data_structures.avl_tree import AVLTree
 from data_structures.graph import TransactionGraph
-from algorithms.sorting import merge_sort, quick_sort
-from algorithms.searching import compare_all_searches
+from algorithms.sorting import merge_sort
 
 
 class BankEngine:
@@ -80,6 +79,20 @@ class BankEngine:
         account = Account(account_number=acc_num, holder_name=name, balance=opening_balance)
         self.accounts.put(acc_num, account)
         self.transfer_graph.add_vertex(acc_num)
+
+        if opening_balance > 0:
+            init_tx = Transaction(
+                tx_id=self._next_tx_id(),
+                tx_type=TransactionType.DEPOSIT,
+                from_account=acc_num,
+                to_account=None,
+                amount=opening_balance,
+                timestamp=datetime.now(),
+                status=TransactionStatus.COMPLETED,
+                description="Opening Deposit / Initial Credit"
+            )
+            self._record_transaction(init_tx)
+
         return True, f"Account {acc_num} successfully created for {name} with balance ₹{opening_balance:,.2f}"
 
     def get_account(self, account_number: str) -> Optional[Account]:
@@ -414,19 +427,21 @@ class BankEngine:
     # -------------------------------------------------------------
     def query_date_range(self, start_date: datetime, end_date: datetime) -> List[Transaction]:
         """Retrieve transactions within a date range using AVL Tree range query."""
-        return self.avl_index.range_query(start_date, end_date)
+        t_start = min(start_date, end_date)
+        t_end = max(start_date, end_date)
+        return self.avl_index.range_query(t_start, t_end)
 
     # -------------------------------------------------------------
-    # Sorting Demonstration (Merge Sort & Quick Sort)
+    # Sorting (Merge Sort - Optimal O(N log N) Stable Algorithm)
     # -------------------------------------------------------------
     def sort_transactions(
         self,
-        by: str = "amount",
+        by: str = "date",
         algorithm: str = "merge",
-        reverse: bool = False
+        reverse: bool = True
     ) -> Tuple[List[Transaction], int]:
         """
-        Sort transaction history by amount or date using manual Merge Sort or Quick Sort.
+        Sort transaction history by date or amount using optimal Merge Sort.
         Returns (sorted_transactions, comparison_count).
         """
         txs = self.history.to_list_forward()
@@ -440,18 +455,14 @@ class BankEngine:
         else:
             key_fn = lambda tx: tx.tx_id
 
-        if algorithm.lower() == "merge":
-            return merge_sort(txs, key=key_fn, reverse=reverse)
-        else:
-            return quick_sort(txs, key=key_fn, reverse=reverse)
+        return merge_sort(txs, key=key_fn, reverse=reverse)
 
     # -------------------------------------------------------------
-    # Account Lookup Comparison (Searching)
+    # Account Lookup (Hash Table O(1) Single Best Algorithm)
     # -------------------------------------------------------------
-    def compare_account_lookup(self, account_number: str) -> Dict:
-        """Compare Linear Search, Binary Search, and Hash Table lookup."""
-        accounts = self.get_all_accounts()
-        return compare_all_searches(accounts, self.accounts, account_number)
+    def lookup_account(self, account_number: str) -> Optional[Account]:
+        """Fetch account using Hash Table O(1) lookup."""
+        return self.get_account(account_number)
 
     # -------------------------------------------------------------
     # Graph Analysis: BFS & DFS

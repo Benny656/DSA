@@ -44,30 +44,6 @@ export interface SystemStatus {
   };
 }
 
-export interface LookupComparison {
-  linear: {
-    name: string;
-    found: boolean;
-    comparisons: number;
-    time_ms: number;
-    complexity: string;
-  };
-  binary: {
-    name: string;
-    found: boolean;
-    comparisons: number;
-    time_ms: number;
-    complexity: string;
-  };
-  hash: {
-    name: string;
-    found: boolean;
-    comparisons: number;
-    time_ms: number;
-    complexity: string;
-  };
-}
-
 export interface DSAState {
   hash_table: {
     capacity: number;

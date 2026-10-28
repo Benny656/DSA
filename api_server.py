@@ -19,7 +19,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.bank_engine import BankEngine
 from core.models import Account, Transaction, TransactionType, TransactionStatus
 from core.statement_pdf import generate_bank_statement_pdf
-from performance.benchmarks import benchmark_searching, benchmark_sorting
 
 
 app = FastAPI(
@@ -132,11 +131,6 @@ def get_account_detail(account_number: str):
     if not acc:
         raise HTTPException(status_code=404, detail="Account not found")
     return acc.to_dict()
-
-
-@app.get("/api/accounts/{account_number}/lookup-comparison")
-def compare_account_lookup(account_number: str):
-    return engine.compare_account_lookup(account_number)
 
 
 # -----------------------------------------------------------------------------
@@ -371,29 +365,7 @@ def get_graph_edges():
 
 
 # -----------------------------------------------------------------------------
-# 9. Performance Benchmarks
-# -----------------------------------------------------------------------------
-@app.get("/api/performance/benchmarks")
-def run_performance_benchmarks(
-    suite: str = "search",
-    scale: str = "fast"
-):
-    if scale == "full":
-        sizes = [1000, 5000, 10000, 25000, 50000, 100000]
-    else:
-        sizes = [1000, 5000, 10000, 20000]
-
-    if suite == "search":
-        results = benchmark_searching(sizes)
-    else:
-        sort_sizes = [s for s in sizes if s <= 25000]
-        results = benchmark_sorting(sort_sizes)
-
-    return results
-
-
-# -----------------------------------------------------------------------------
-# 10. Live DSA State Inspector (For "Behind-the-Scenes" Evaluator Console)
+# 9. Live DSA State Inspector (For "Behind-the-Scenes" Evaluator Console)
 # -----------------------------------------------------------------------------
 @app.get("/api/dsa/state")
 def get_live_dsa_state():
